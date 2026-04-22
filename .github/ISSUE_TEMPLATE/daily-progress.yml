@@ -1,0 +1,35 @@
+name: Daily progress
+description: Log one day of visible GitHub progress for the BudgetFlow sprint.
+title: "Day X: "
+labels:
+  - docs
+body:
+  - type: input
+    id: goal
+    attributes:
+      label: Goal
+      description: What is the smallest meaningful improvement for today?
+      placeholder: Improve dashboard empty-state copy
+    validations:
+      required: true
+  - type: textarea
+    id: visible_output
+    attributes:
+      label: Visible output
+      description: What will be visibly better in the repo after this is done?
+      placeholder: Updated UI copy, changelog entry, and screenshots
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What does done look like?
+      placeholder: README updated, commit pushed, issue closed
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Optional context or blockers

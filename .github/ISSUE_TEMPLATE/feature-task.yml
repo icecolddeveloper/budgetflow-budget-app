@@ -1,0 +1,40 @@
+name: Feature or polish task
+description: Track a scoped implementation, polish pass, or portfolio improvement.
+title: "Task: "
+labels:
+  - polish
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Task summary
+      placeholder: Improve transaction error messages
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - backend
+        - frontend
+        - ui
+        - docs
+        - tests
+        - deployment
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong, missing, or unclear today?
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: What must be true before this issue can close?
+    validations:
+      required: true

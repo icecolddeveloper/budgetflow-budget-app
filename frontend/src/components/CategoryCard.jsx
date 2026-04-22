@@ -1,0 +1,65 @@
+import { PencilLine, Trash2 } from "lucide-react";
+
+import { formatCurrency } from "../utils/format";
+import { resolveCategoryIcon } from "../utils/icons";
+
+export function CategoryCard({ category, onEdit, onDelete, compact = false }) {
+  const Icon = resolveCategoryIcon(category.icon);
+  const progress = Math.min(Number(category.utilization || 0), 100);
+
+  return (
+    <article className={`surface-card category-card ${compact ? "category-card--compact" : ""}`}>
+      <div className="category-card__header">
+        <div className="category-card__identity">
+          <span className="category-card__icon" style={{ backgroundColor: `${category.color}18`, color: category.color }}>
+            <Icon size={20} />
+          </span>
+          <div>
+            <h3>{category.name}</h3>
+            <p>{category.description || "Flexible spending bucket"}</p>
+          </div>
+        </div>
+        {onEdit || onDelete ? (
+          <div className="category-card__actions">
+            {onEdit ? (
+              <button type="button" className="icon-button" onClick={() => onEdit(category)} aria-label={`Edit ${category.name}`}>
+                <PencilLine size={16} />
+              </button>
+            ) : null}
+            {onDelete ? (
+              <button
+                type="button"
+                className="icon-button icon-button--danger"
+                onClick={() => onDelete(category)}
+                aria-label={`Delete ${category.name}`}
+              >
+                <Trash2 size={16} />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="category-card__numbers">
+        <div>
+          <span className="metric-label">Current balance</span>
+          <strong>{formatCurrency(category.balance)}</strong>
+        </div>
+        <div>
+          <span className="metric-label">Target</span>
+          <strong>{formatCurrency(category.monthly_budget)}</strong>
+        </div>
+      </div>
+
+      <div className="progress-block">
+        <div className="progress-block__labels">
+          <span>Progress to target</span>
+          <span>{progress}%</span>
+        </div>
+        <div className="progress-bar">
+          <span style={{ width: `${progress}%`, backgroundColor: category.color }} />
+        </div>
+      </div>
+    </article>
+  );
+}

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.venv/
+venv/
+env/
+
+# Django
+backend/staticfiles/
+backend/media/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Environment files
+.env
+backend/.env
+frontend/.env
+
+# Local packaging / exports
+BudgetFlow.zip
+BudgetFlow_Package/
+Explanation.txt
+
+# OS / editor
+.DS_Store
+Thumbs.db
