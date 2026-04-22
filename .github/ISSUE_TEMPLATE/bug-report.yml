@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible problem in BudgetFlow.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Bug summary
+      placeholder: Transfer form crashes after selecting the same category twice
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the exact steps needed to reproduce the issue.
+      placeholder: |
+        1. Log in
+        2. Open the transactions modal
+        3. Select the same category as source and destination
+        4. Submit the form
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened in reality?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, screen size, and any setup details that matter.

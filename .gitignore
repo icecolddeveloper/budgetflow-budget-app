@@ -19,11 +19,6 @@ frontend/dist/
 backend/.env
 frontend/.env
 
-# Local-only files
-Explanation.txt
-CONTRIBUTING.md
-docs/
-
 # OS / editor
 .DS_Store
 Thumbs.db
