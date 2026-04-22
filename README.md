@@ -1,15 +1,11 @@
 # BudgetFlow
 
-BudgetFlow is a full-stack budget management app built with Django REST Framework and React. It is designed as a polished portfolio project with secure authentication, category-based budgeting, transaction flows, a clean dashboard, and a documented 30-day GitHub build sprint.
+BudgetFlow is a full-stack budget management app built with Django REST Framework and React. It is designed as a polished portfolio project with secure authentication, category-based budgeting, transaction flows, and a clean dashboard.
 
 ## Why This Repo Exists
 
-This project serves two goals at the same time:
+Ship a strong budgeting product that looks and feels modern while keeping the public repo focused on the app itself.
 
-1. Ship a strong budgeting product that looks and feels modern.
-2. Grow a visible GitHub presence through consistent, meaningful daily progress.
-
-The local workspace folder can stay named `BudgetApp 2026`, while the recommended public repository name is `budgetflow-budget-app`.
 
 ## Current Features
 
@@ -124,32 +120,8 @@ VITE_CURRENCY=USD
 |       |-- context/
 |       |-- pages/
 |       `-- utils/
-|-- docs/
-|   |-- 30-day-github-plan.md
-|   |-- CHANGELOG.md
-|   |-- DECISIONS.md
-|   |-- GITHUB_SETUP_CHECKLIST.md
-|   |-- MANUAL-QA-CHECKLIST.md
-|   |-- ROADMAP.md
-|   `-- assets/
 `-- .github/
 ```
-
-## GitHub Sprint Docs
-
-This repo includes working docs to support a 30-day GitHub presence sprint:
-
-- [30-day plan](docs/30-day-github-plan.md)
-- [GitHub setup checklist](docs/GITHUB_SETUP_CHECKLIST.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Architecture decisions](docs/DECISIONS.md)
-- [Manual QA checklist](docs/MANUAL-QA-CHECKLIST.md)
-- [Changelog](docs/CHANGELOG.md)
-- [Issue seeds](docs/github-issue-seeds.md)
-
-## Visual Roadmap
-
-Screenshots are planned as part of the public polish sprint. The expected capture list lives in [docs/assets/README.md](docs/assets/README.md).
 
 ## Testing
 
@@ -173,12 +145,3 @@ If Django dependencies are not installed yet, follow the backend quick-start fir
 - Deployment config is planned but not completed yet
 - Production media/demo links are not published yet
 - Screenshot assets still need to be captured from a running app
-
-## Roadmap Snapshot
-
-- Week 1: repo setup, docs, cleanup, and GitHub structure
-- Week 2: UX polish and responsive refinement
-- Week 3: tests, QA, and deployment prep
-- Week 4: releases, screenshots, and final portfolio polish
-
-See the full breakdown in [docs/ROADMAP.md](docs/ROADMAP.md).
