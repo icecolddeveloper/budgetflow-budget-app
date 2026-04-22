@@ -19,17 +19,10 @@ frontend/dist/
 backend/.env
 frontend/.env
 
-# Local packaging / exports
-BudgetFlow.zip
-BudgetFlow_Package/
+# Local-only files
 Explanation.txt
 CONTRIBUTING.md
 docs/
-BudgetFlow-30-Day-GitHub-Plan.pdf
-docs/30-day-github-plan.md
-docs/GITHUB_SETUP_CHECKLIST.md
-docs/github-issue-seeds.md
-scripts/generate_github_plan_pdf.py
 
 # OS / editor
 .DS_Store
