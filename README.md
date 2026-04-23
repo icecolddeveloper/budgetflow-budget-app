@@ -75,6 +75,13 @@ If you are testing the project for the first time:
 5. Review dashboard totals and recent transactions.
 6. Open Django admin to inspect the data model if needed.
 
+## Project Management
+
+- Sprint issue roadmap: `docs/sprint-issues.md`
+- Label catalog: `.github/labels.yml`
+- Milestone catalog: `.github/milestones.yml`
+- Issue forms: `.github/ISSUE_TEMPLATE/`
+
 ## Environment Variables
 
 ### Backend

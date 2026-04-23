@@ -1,0 +1,17 @@
+milestones:
+  - title: "Week 1: Foundation"
+    days: "1-7"
+    due_on: "2026-04-24"
+    description: Establish the public repo foundation, contribution flow, and issue structure.
+  - title: "Week 2: Product Polish"
+    days: "8-14"
+    due_on: "2026-05-01"
+    description: Improve copy, validation, empty states, mobile layouts, and architecture notes.
+  - title: "Week 3: Quality + Deployment"
+    days: "15-21"
+    due_on: "2026-05-08"
+    description: Expand tests, improve error handling, document QA, and prepare release notes.
+  - title: "Week 4: Portfolio Finish"
+    days: "22-30"
+    due_on: "2026-05-17"
+    description: Prepare deployment docs, security cleanup, final QA, and portfolio-ready release polish.

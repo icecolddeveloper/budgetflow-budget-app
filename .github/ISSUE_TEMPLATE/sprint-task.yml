@@ -1,0 +1,53 @@
+name: Sprint task
+description: Track one daily BudgetFlow sprint improvement.
+title: "[Sprint]: Day X - "
+labels:
+  - sprint
+  - priority: normal
+body:
+  - type: input
+    id: day
+    attributes:
+      label: Sprint day
+      placeholder: Day 6
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Weekly milestone
+      placeholder: "Week 1: Foundation"
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Target outcome
+      description: Describe the visible repo, product, docs, test, or release outcome.
+      placeholder: Create GitHub labels, milestones, and daily sprint issue structure.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope checklist
+      description: List the smallest useful pieces needed to finish this task.
+      placeholder: |
+        - [ ] Add source-of-truth planning assets
+        - [ ] Create or update related GitHub issues
+        - [ ] Push one meaningful daily commit
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: Note the command, manual check, screenshot, or review step that proves the work is complete.
+      placeholder: Git status is clean after commit and the linked issue is updated.
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: Tomorrow's handoff
+      description: Capture the next smallest meaningful improvement after this issue closes.

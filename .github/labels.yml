@@ -1,0 +1,40 @@
+labels:
+  - name: setup
+    color: "6f42c1"
+    description: Repository setup, project configuration, and sprint scaffolding.
+  - name: backend
+    color: "0e8a16"
+    description: Django, API, data model, serializer, and service-layer work.
+  - name: frontend
+    color: "1d76db"
+    description: React, routing, state, API client, and browser-facing behavior.
+  - name: ui
+    color: "fbca04"
+    description: Visual polish, layout, responsive design, copy, and interaction work.
+  - name: docs
+    color: "0075ca"
+    description: README, setup guides, reviewer notes, and public documentation.
+  - name: tests
+    color: "5319e7"
+    description: Automated tests, manual QA, test data, and verification coverage.
+  - name: deployment
+    color: "c2e0c6"
+    description: Hosting, environment configuration, release prep, and deploy docs.
+  - name: polish
+    color: "fef2c0"
+    description: Small improvements that make the portfolio presentation stronger.
+  - name: security
+    color: "d73a4a"
+    description: Authentication, permissions, secrets, and production safety checks.
+  - name: release
+    color: "bfd4f2"
+    description: Version notes, launch checklists, and release-ready packaging.
+  - name: sprint
+    color: "0052cc"
+    description: Daily 30-day sprint planning and progress tracking.
+  - name: priority: high
+    color: "b60205"
+    description: Important work that should be handled before lower-priority polish.
+  - name: priority: normal
+    color: "ededed"
+    description: Planned work with normal sprint priority.

@@ -1,1 +1,5 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
+contact_links:
+  - name: BudgetFlow sprint issue roadmap
+    url: https://github.com/icecolddeveloper/budgetflow-budget-app/blob/main/docs/sprint-issues.md
+    about: Review the 30-day issue structure, labels, milestones, and daily sprint titles.
