@@ -3,10 +3,35 @@ import { useState } from "react";
 import { ModalShell } from "./ModalShell";
 
 const transactionKinds = [
-  { value: "deposit", label: "Deposit" },
-  { value: "withdraw", label: "Withdraw" },
-  { value: "transfer", label: "Transfer" },
+  { value: "deposit", label: "Income" },
+  { value: "withdraw", label: "Expense" },
+  { value: "transfer", label: "Allocate" },
 ];
+
+const TRANSACTION_FIELDS = [
+  "kind",
+  "amount",
+  "description",
+  "source_category",
+  "destination_category",
+  "occurred_at",
+];
+
+function extractFieldErrors(data, fields) {
+  if (!data || typeof data !== "object") {
+    return {};
+  }
+  const result = {};
+  for (const field of fields) {
+    const value = data[field];
+    if (Array.isArray(value)) {
+      result[field] = value.map(String).join(" ");
+    } else if (typeof value === "string") {
+      result[field] = value;
+    }
+  }
+  return result;
+}
 
 function formatLocalDateTime() {
   const now = new Date();
@@ -16,12 +41,16 @@ function formatLocalDateTime() {
 }
 
 export function TransactionFormModal({ categories, onClose, onSubmit }) {
+  const primaryCategory = categories.find((category) => category.is_primary);
+  const primaryId = primaryCategory ? String(primaryCategory.id) : "";
+  const fallbackId = categories[0]?.id ? String(categories[0].id) : "";
+
   const [form, setForm] = useState({
     kind: "deposit",
     amount: "",
     description: "",
-    source_category: "",
-    destination_category: categories[0]?.id ? String(categories[0].id) : "",
+    source_category: primaryId,
+    destination_category: primaryId || fallbackId,
     occurred_at: formatLocalDateTime(),
   });
   const [errors, setErrors] = useState({});
@@ -31,7 +60,18 @@ export function TransactionFormModal({ categories, onClose, onSubmit }) {
 
   function updateField(event) {
     const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+    setForm((current) => {
+      if (name !== "kind") {
+        return { ...current, [name]: value };
+      }
+      if (value === "deposit") {
+        return { ...current, kind: value, source_category: "", destination_category: primaryId };
+      }
+      if (value === "withdraw") {
+        return { ...current, kind: value, source_category: "", destination_category: "" };
+      }
+      return { ...current, kind: value, source_category: primaryId, destination_category: "" };
+    });
   }
 
   async function handleSubmit(event) {
@@ -68,15 +108,24 @@ export function TransactionFormModal({ categories, onClose, onSubmit }) {
       return;
     }
 
+    const payload = {
+      kind: form.kind,
+      amount: Number(form.amount).toFixed(2),
+      description: form.description,
+      occurred_at: new Date(form.occurred_at).toISOString(),
+      source_category: form.kind === "deposit" ? null : form.source_category || null,
+      destination_category:
+        form.kind === "withdraw" ? null : form.destination_category || null,
+    };
+
     setSubmitting(true);
     try {
-      await onSubmit({
-        ...form,
-        amount: Number(form.amount).toFixed(2),
-        source_category: form.source_category || null,
-        destination_category: form.destination_category || null,
-        occurred_at: new Date(form.occurred_at).toISOString(),
-      });
+      await onSubmit(payload);
+    } catch (error) {
+      const fieldErrors = extractFieldErrors(error?.data, TRANSACTION_FIELDS);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors((current) => ({ ...current, ...fieldErrors }));
+      }
     } finally {
       setSubmitting(false);
     }

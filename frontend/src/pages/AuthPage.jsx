@@ -2,6 +2,7 @@ import { ArrowRight, LockKeyhole, WalletCards } from "lucide-react";
 import { useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
+import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/ToastProvider";
 import { useAuth } from "../context/AuthContext";
 
@@ -175,7 +176,7 @@ export function AuthPage() {
           </article>
           <article className="surface-card hero-metrics__card">
             <strong>Fast transaction flow</strong>
-            <p>Deposit, withdraw, or transfer funds without losing context.</p>
+            <p>Log income, track expenses, and allocate to envelopes without losing context.</p>
           </article>
           <article className="surface-card hero-metrics__card">
             <strong>Readable insights</strong>
@@ -185,6 +186,9 @@ export function AuthPage() {
       </section>
 
       <section className="auth-panel auth-panel--form">
+        <div className="auth-panel__topbar">
+          <ThemeToggle />
+        </div>
         <div className="auth-tabs">
           <button
             type="button"

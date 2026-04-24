@@ -171,6 +171,21 @@ class CategoryApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertTrue(Category.objects.filter(pk=category.pk).exists())
 
+    def test_destroy_rejects_primary_category(self):
+        wallet = Category.objects.create(
+            user=self.user,
+            name="Wallet",
+            slug="wallet",
+            color="#0f172a",
+            icon="wallet",
+            is_primary=True,
+        )
+
+        response = self.client.delete(f"/api/categories/{wallet.pk}/")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(Category.objects.filter(pk=wallet.pk).exists())
+
     def test_destroy_allows_empty_category(self):
         category = make_category(self.user, "Gifts", "gifts")
 
@@ -212,6 +227,25 @@ class TransactionApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 3)
+
+    def test_withdraw_over_balance_returns_400_not_500(self):
+        empty = make_category(self.user, "Transport", "transport", balance="0.00")
+
+        response = self.client.post(
+            "/api/transactions/",
+            data={
+                "kind": "withdraw",
+                "amount": "250.00",
+                "source_category": empty.pk,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        body = response.json()
+        self.assertIn("amount", body)
+        self.assertIn("Transport", body["amount"][0])
+        self.assertIn("available", body["amount"][0])
 
 
 class DashboardApiTests(TestCase):

@@ -1,11 +1,17 @@
 import { ArrowDownLeft, ArrowRightLeft, ArrowUpRight } from "lucide-react";
 
-import { formatCurrency, formatDateTime, sentenceCase } from "../utils/format";
+import { formatCurrency, formatDateTime } from "../utils/format";
 
 const iconMap = {
   deposit: ArrowDownLeft,
   transfer: ArrowRightLeft,
   withdraw: ArrowUpRight,
+};
+
+const kindLabelMap = {
+  deposit: "Income",
+  withdraw: "Expense",
+  transfer: "Allocate",
 };
 
 export function TransactionsList({ transactions, compact = false }) {
@@ -27,7 +33,9 @@ export function TransactionsList({ transactions, compact = false }) {
             </div>
 
             <div className="transaction-row__meta">
-              <span className={`pill pill--${transaction.kind}`}>{sentenceCase(transaction.kind)}</span>
+              <span className={`pill pill--${transaction.kind}`}>
+                {kindLabelMap[transaction.kind] || transaction.kind}
+              </span>
               <strong>{formatCurrency(transaction.amount)}</strong>
               <time dateTime={transaction.occurred_at}>{formatDateTime(transaction.occurred_at)}</time>
             </div>

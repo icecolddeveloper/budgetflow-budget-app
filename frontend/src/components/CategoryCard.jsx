@@ -15,7 +15,10 @@ export function CategoryCard({ category, onEdit, onDelete, compact = false }) {
             <Icon size={20} />
           </span>
           <div>
-            <h3>{category.name}</h3>
+            <h3>
+              {category.name}
+              {category.is_primary ? <span className="category-card__tag">Wallet</span> : null}
+            </h3>
             <p>{category.description || "Flexible spending bucket"}</p>
           </div>
         </div>
@@ -26,7 +29,7 @@ export function CategoryCard({ category, onEdit, onDelete, compact = false }) {
                 <PencilLine size={16} />
               </button>
             ) : null}
-            {onDelete ? (
+            {onDelete && !category.is_primary ? (
               <button
                 type="button"
                 className="icon-button icon-button--danger"

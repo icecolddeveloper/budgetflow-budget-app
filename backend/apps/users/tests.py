@@ -22,6 +22,10 @@ class RegisterSerializerTests(TestCase):
         self.assertTrue(User.objects.filter(username="alex").exists())
         self.assertGreater(user.categories.count(), 0)
 
+        primaries = user.categories.filter(is_primary=True)
+        self.assertEqual(primaries.count(), 1)
+        self.assertEqual(primaries.first().name, "Wallet")
+
 
 class RegistrationCorsTests(TestCase):
     def test_register_preflight_allows_local_dev_origins(self):

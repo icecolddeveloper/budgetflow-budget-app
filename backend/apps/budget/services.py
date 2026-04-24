@@ -9,6 +9,14 @@ from .models import Category, Transaction
 
 DEFAULT_CATEGORY_TEMPLATES = [
     {
+        "name": "Wallet",
+        "description": "Unallocated income waiting to be budgeted.",
+        "color": "#0f172a",
+        "icon": "wallet",
+        "monthly_budget": Decimal("0.00"),
+        "is_primary": True,
+    },
+    {
         "name": "Food",
         "description": "Groceries, restaurants, and snacks.",
         "color": "#f97316",
@@ -96,7 +104,14 @@ def create_transaction(
             raise ValidationError({"source_category": "Choose a category to spend from."})
         category = Category.objects.select_for_update().get(pk=source_category.pk, user=user)
         if category.balance < amount:
-            raise ValidationError({"amount": "Insufficient category balance for this withdrawal."})
+            raise ValidationError(
+                {
+                    "amount": (
+                        f"{category.name} only has ${category.balance:.2f} available. "
+                        "Move funds into it from Wallet before withdrawing."
+                    )
+                }
+            )
         category.balance -= amount
         category.save(update_fields=["balance", "updated_at"])
         return Transaction.objects.create(
@@ -120,7 +135,13 @@ def create_transaction(
     destination = Category.objects.select_for_update().get(pk=destination_category.pk, user=user)
 
     if source.balance < amount:
-        raise ValidationError({"amount": "Insufficient category balance for this transfer."})
+        raise ValidationError(
+            {
+                "amount": (
+                    f"{source.name} only has ${source.balance:.2f} available to transfer."
+                )
+            }
+        )
 
     source.balance -= amount
     destination.balance += amount

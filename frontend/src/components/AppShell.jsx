@@ -9,6 +9,7 @@ import {
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navigation = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
@@ -90,6 +91,7 @@ export function AppShell() {
           </div>
 
           <div className="app-header__actions">
+            <ThemeToggle />
             <div className="user-pill">
               <span>{user?.first_name?.trim() || user?.username?.slice(0, 1)?.toUpperCase() || "U"}</span>
               <div>

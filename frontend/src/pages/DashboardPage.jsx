@@ -44,6 +44,7 @@ export function DashboardPage() {
       await loadDashboard();
     } catch (error) {
       toast.error("Could not save transaction", error.message);
+      throw error;
     }
   }
 

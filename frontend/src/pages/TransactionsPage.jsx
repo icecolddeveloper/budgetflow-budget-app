@@ -13,9 +13,9 @@ import { formatCurrency } from "../utils/format";
 
 const filters = [
   { value: "all", label: "All activity" },
-  { value: "deposit", label: "Deposits" },
-  { value: "withdraw", label: "Withdrawals" },
-  { value: "transfer", label: "Transfers" },
+  { value: "deposit", label: "Income" },
+  { value: "withdraw", label: "Expenses" },
+  { value: "transfer", label: "Allocations" },
 ];
 
 export function TransactionsPage() {
@@ -56,6 +56,7 @@ export function TransactionsPage() {
       await loadData();
     } catch (error) {
       toast.error("Could not save transaction", error.message);
+      throw error;
     }
   }
 
@@ -126,7 +127,7 @@ export function TransactionsPage() {
           label="Total outflow"
           value={formatCurrency(outflowTotal)}
           accent="warning"
-          meta="Withdrawals and transfers"
+          meta="Expenses and allocations"
         />
       </section>
 

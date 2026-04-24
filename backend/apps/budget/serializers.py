@@ -1,6 +1,7 @@
 import re
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.text import slugify
 from rest_framework import serializers
 
@@ -26,12 +27,19 @@ class CategorySerializer(serializers.ModelSerializer):
             "color",
             "balance",
             "monthly_budget",
+            "is_primary",
             "remaining_budget",
             "utilization",
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("slug", "balance", "created_at", "updated_at")
+        read_only_fields = (
+            "slug",
+            "balance",
+            "is_primary",
+            "created_at",
+            "updated_at",
+        )
 
     def validate_color(self, value):
         if not HEX_COLOR_RE.match(value):
@@ -109,10 +117,13 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     def get_title(self, obj):
         if obj.kind == Transaction.Kind.DEPOSIT:
-            return f"Deposit into {self.get_destination_category_label(obj)}"
+            return f"Income to {self.get_destination_category_label(obj)}"
         if obj.kind == Transaction.Kind.WITHDRAW:
-            return f"Withdrawal from {self.get_source_category_label(obj)}"
-        return f"Transfer {self.get_source_category_label(obj)} to {self.get_destination_category_label(obj)}"
+            return f"Expense from {self.get_source_category_label(obj)}"
+        return (
+            f"Allocate {self.get_source_category_label(obj)} "
+            f"to {self.get_destination_category_label(obj)}"
+        )
 
 
 class TransactionCreateSerializer(serializers.Serializer):
@@ -136,15 +147,27 @@ class TransactionCreateSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         kind = attrs["kind"]
-        if kind == Transaction.Kind.DEPOSIT and not attrs.get("destination_category"):
-            raise serializers.ValidationError({"destination_category": "Choose a category to fund."})
-        if kind == Transaction.Kind.WITHDRAW and not attrs.get("source_category"):
-            raise serializers.ValidationError({"source_category": "Choose a category to spend from."})
+        if kind == Transaction.Kind.DEPOSIT:
+            if not attrs.get("destination_category"):
+                raise serializers.ValidationError(
+                    {"destination_category": "Choose a category to fund."}
+                )
+            attrs["source_category"] = None
+        if kind == Transaction.Kind.WITHDRAW:
+            if not attrs.get("source_category"):
+                raise serializers.ValidationError(
+                    {"source_category": "Choose a category to spend from."}
+                )
+            attrs["destination_category"] = None
         if kind == Transaction.Kind.TRANSFER:
             if not attrs.get("source_category"):
-                raise serializers.ValidationError({"source_category": "Choose a source category."})
+                raise serializers.ValidationError(
+                    {"source_category": "Choose a source category."}
+                )
             if not attrs.get("destination_category"):
-                raise serializers.ValidationError({"destination_category": "Choose a destination category."})
+                raise serializers.ValidationError(
+                    {"destination_category": "Choose a destination category."}
+                )
             if attrs["source_category"] == attrs["destination_category"]:
                 raise serializers.ValidationError(
                     {"destination_category": "Source and destination must be different."}
@@ -152,7 +175,13 @@ class TransactionCreateSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        return create_transaction(user=self.context["request"].user, **validated_data)
+        try:
+            return create_transaction(
+                user=self.context["request"].user, **validated_data
+            )
+        except DjangoValidationError as exc:
+            detail = getattr(exc, "message_dict", None) or exc.messages
+            raise serializers.ValidationError(detail)
 
     def to_representation(self, instance):
         return TransactionSerializer(instance, context=self.context).data

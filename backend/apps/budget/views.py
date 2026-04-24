@@ -30,6 +30,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         category = self.get_object()
+        if category.is_primary:
+            raise ValidationError(
+                {"detail": "The Wallet category cannot be deleted."}
+            )
         if category.balance != 0:
             raise ValidationError(
                 {"detail": "Move or withdraw the remaining balance before deleting this category."}

@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 
@@ -18,6 +19,7 @@ class Category(models.Model):
     icon = models.CharField(max_length=40, default="wallet")
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     monthly_budget = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    is_primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -25,6 +27,11 @@ class Category(models.Model):
         ordering = ("name",)
         constraints = [
             models.UniqueConstraint(fields=("user", "slug"), name="unique_category_slug_per_user"),
+            models.UniqueConstraint(
+                fields=("user",),
+                condition=Q(is_primary=True),
+                name="one_primary_category_per_user",
+            ),
         ]
 
     def __str__(self):
