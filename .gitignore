@@ -19,6 +19,10 @@ frontend/dist/
 backend/.env
 frontend/.env
 
+# Local dev server logs
+/backend-server*.log
+/frontend-server*.log
+
 # OS / editor
 .DS_Store
 Thumbs.db

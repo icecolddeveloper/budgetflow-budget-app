@@ -750,6 +750,16 @@ p {
   grid-column: 1 / -1;
 }
 
+.field__hints {
+  list-style: disc;
+  padding-left: 18px;
+  margin: 0;
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  display: grid;
+  gap: 2px;
+}
+
 .color-field {
   display: grid;
   grid-template-columns: 64px 1fr;

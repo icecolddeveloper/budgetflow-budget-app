@@ -54,14 +54,14 @@ npm.cmd run dev
 
 Frontend URL:
 
-- App: `http://localhost:5173`
+- App: `http://localhost:5173` or `http://127.0.0.1:5173`
 
 ## Full Stack Run Order
 
 1. Start the backend first from `backend/`.
-2. Confirm `backend/.env` allows `http://localhost:5173` in CORS settings.
+2. Confirm `backend/.env` allows both `http://localhost:5173` and `http://127.0.0.1:5173` in CORS settings.
 3. Start the frontend from `frontend/`.
-4. Open `http://localhost:5173`.
+4. Open `http://localhost:5173` or `http://127.0.0.1:5173`.
 5. Create an account and test the auth, category, dashboard, and transaction flows.
 
 ## Reviewer Demo Flow
@@ -92,8 +92,8 @@ Create `backend/.env` from the example file:
 SECRET_KEY=replace-me-with-a-secure-secret
 DEBUG=True
 ALLOWED_HOSTS=127.0.0.1,localhost
-CORS_ALLOWED_ORIGINS=http://localhost:5173
-CSRF_TRUSTED_ORIGINS=http://localhost:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CSRF_TRUSTED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 DB_NAME=db.sqlite3
 ```
 
@@ -146,9 +146,38 @@ py manage.py test
 
 If Django dependencies are not installed yet, follow the backend quick-start first.
 
+## Deployment
+
+The backend is designed for Render and the frontend for Vercel.
+
+### Backend on Render
+
+1. Push the repo to GitHub.
+2. In Render, click **New > Blueprint** and point it at the repo. Render will read `render.yaml` and provision a web service plus a Postgres database.
+3. After first deploy, set these env vars in the service's **Environment** tab (the yaml leaves them as `sync: false`):
+   - `CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>`
+   - `CSRF_TRUSTED_ORIGINS=https://<your-vercel-domain>`
+4. Optional: create a superuser via the Render shell: `python manage.py createsuperuser`.
+
+### Frontend on Vercel
+
+1. Import the repo in Vercel and set **Root Directory** to `frontend`.
+2. `vercel.json` configures the Vite build and SPA rewrites automatically.
+3. Add environment variable `VITE_API_BASE_URL=https://<your-render-service>.onrender.com/api`.
+4. Deploy. Update the backend's `CORS_ALLOWED_ORIGINS` / `CSRF_TRUSTED_ORIGINS` with the resulting Vercel URL.
+
+### Local Postgres (optional)
+
+To run against Postgres locally instead of SQLite, set `DATABASE_URL` in `backend/.env`:
+
+```env
+DATABASE_URL=postgres://USER:PASSWORD@127.0.0.1:5432/budgetflow
+```
+
+Leave it empty to fall back to SQLite.
+
 ## Known Gaps
 
 - Frontend automated tests are not added yet
-- Deployment config is planned but not completed yet
 - Production media/demo links are not published yet
 - Screenshot assets still need to be captured from a running app

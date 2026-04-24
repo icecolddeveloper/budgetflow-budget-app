@@ -18,6 +18,32 @@ const initialRegister = {
   password_confirm: "",
 };
 
+const REGISTER_FIELDS = ["username", "first_name", "email", "password", "password_confirm"];
+const LOGIN_FIELDS = ["username", "password"];
+
+const PASSWORD_REQUIREMENTS = [
+  "At least 8 characters long",
+  "Not too similar to your username or email",
+  "Not a commonly used password",
+  "Not entirely numeric",
+];
+
+function extractFieldErrors(data, fields) {
+  if (!data || typeof data !== "object") {
+    return {};
+  }
+  const result = {};
+  for (const field of fields) {
+    const value = data[field];
+    if (Array.isArray(value)) {
+      result[field] = value.map(String).join(" ");
+    } else if (typeof value === "string") {
+      result[field] = value;
+    }
+  }
+  return result;
+}
+
 export function AuthPage() {
   const { isAuthenticated, login, register } = useAuth();
   const toast = useToast();
@@ -68,6 +94,10 @@ export function AuthPage() {
       toast.success("Welcome back", "Your financial dashboard is ready.");
       navigate(nextPath, { replace: true });
     } catch (error) {
+      const fieldErrors = extractFieldErrors(error.data, LOGIN_FIELDS);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors((current) => ({ ...current, ...fieldErrors }));
+      }
       toast.error("Login failed", error.message);
     } finally {
       setSubmitting(false);
@@ -106,6 +136,10 @@ export function AuthPage() {
       toast.success("Account created", "Starter categories were added to your workspace.");
       navigate("/dashboard", { replace: true });
     } catch (error) {
+      const fieldErrors = extractFieldErrors(error.data, REGISTER_FIELDS);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors((current) => ({ ...current, ...fieldErrors }));
+      }
       toast.error("Registration failed", error.message);
     } finally {
       setSubmitting(false);
@@ -258,8 +292,14 @@ export function AuthPage() {
                   value={registerForm.password}
                   onChange={updateRegister}
                   placeholder="Create a password"
+                  aria-describedby="password-requirements"
                 />
                 {errors.password ? <small>{errors.password}</small> : null}
+                <ul id="password-requirements" className="field__hints">
+                  {PASSWORD_REQUIREMENTS.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </label>
 
               <label className="field">
