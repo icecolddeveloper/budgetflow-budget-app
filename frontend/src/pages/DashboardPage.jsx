@@ -13,13 +13,20 @@ import { StatCard } from "../components/StatCard";
 import { useToast } from "../components/ToastProvider";
 import { TransactionFormModal } from "../components/TransactionFormModal";
 import { TransactionsList } from "../components/TransactionsList";
+import { UnverifiedBanner } from "../components/UnverifiedBanner";
+import { WelcomeModal } from "../components/WelcomeModal";
+import { useAuth } from "../context/AuthContext";
 import { formatCurrency } from "../utils/format";
+
+const WELCOME_STORAGE_PREFIX = "budgetflow.welcome_seen.";
 
 export function DashboardPage() {
   const toast = useToast();
+  const { user } = useAuth();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   async function loadDashboard() {
     try {
@@ -35,6 +42,23 @@ export function DashboardPage() {
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) {
+      return;
+    }
+    const key = `${WELCOME_STORAGE_PREFIX}${user.id}`;
+    if (!window.localStorage.getItem(key)) {
+      setShowWelcome(true);
+    }
+  }, [user?.id]);
+
+  function dismissWelcome() {
+    if (user?.id) {
+      window.localStorage.setItem(`${WELCOME_STORAGE_PREFIX}${user.id}`, "1");
+    }
+    setShowWelcome(false);
+  }
 
   async function handleTransactionCreate(payload) {
     try {
@@ -75,6 +99,9 @@ export function DashboardPage() {
 
   return (
     <div className="page-stack">
+      {user && user.email_verified === false ? (
+        <UnverifiedBanner email={user.email} />
+      ) : null}
       <section className="hero-banner">
         <div>
           <span className="eyebrow">This month</span>
@@ -204,6 +231,8 @@ export function DashboardPage() {
           onSubmit={handleTransactionCreate}
         />
       ) : null}
+
+      {showWelcome ? <WelcomeModal onClose={dismissWelcome} /> : null}
     </div>
   );
 }

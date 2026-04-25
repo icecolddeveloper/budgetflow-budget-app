@@ -18,7 +18,6 @@ export function CategoryFormModal({ category, onClose, onSubmit }) {
     description: category?.description || "",
     icon: category?.icon || "wallet",
     color: category?.color || "#0f766e",
-    monthly_budget: category?.monthly_budget || "0.00",
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -34,9 +33,6 @@ export function CategoryFormModal({ category, onClose, onSubmit }) {
     const nextErrors = {};
     if (!form.name.trim()) {
       nextErrors.name = "Category name is required.";
-    }
-    if (Number(form.monthly_budget) < 0) {
-      nextErrors.monthly_budget = "Budget target must be zero or more.";
     }
 
     setErrors(nextErrors);
@@ -97,25 +93,12 @@ export function CategoryFormModal({ category, onClose, onSubmit }) {
             />
           </label>
 
-          <label className="field">
+          <label className="field field--full">
             <span>Accent color</span>
             <div className="color-field">
               <input type="color" name="color" value={form.color} onChange={updateField} />
               <input name="color" value={form.color} onChange={updateField} />
             </div>
-          </label>
-
-          <label className="field">
-            <span>Monthly target</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              name="monthly_budget"
-              value={form.monthly_budget}
-              onChange={updateField}
-            />
-            {errors.monthly_budget ? <small>{errors.monthly_budget}</small> : null}
           </label>
         </div>
 

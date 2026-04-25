@@ -2,10 +2,13 @@ import {
   ArrowRightLeft,
   LayoutGrid,
   LogOut,
+  Menu,
   PieChart,
   Plus,
   Sparkles,
+  X,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
@@ -36,8 +39,26 @@ export function AppShell() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const currentMeta = pageMeta[location.pathname] || pageMeta["/dashboard"];
+  const initial =
+    user?.first_name?.trim()?.[0]?.toUpperCase() ||
+    user?.username?.slice(0, 1)?.toUpperCase() ||
+    "U";
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const handler = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [menuOpen]);
 
   function handleLogout() {
     logout();
@@ -84,7 +105,14 @@ export function AppShell() {
 
       <div className="app-main">
         <header className="app-header">
-          <div>
+          <div className="app-header__brand-mobile">
+            <span className="brand-mark__badge">
+              <Sparkles size={16} />
+            </span>
+            <strong>BudgetFlow</strong>
+          </div>
+
+          <div className="app-header__titles">
             <span className="eyebrow">Budget workspace</span>
             <h1>{currentMeta.title}</h1>
             <p>{currentMeta.description}</p>
@@ -93,7 +121,7 @@ export function AppShell() {
           <div className="app-header__actions">
             <ThemeToggle />
             <div className="user-pill">
-              <span>{user?.first_name?.trim() || user?.username?.slice(0, 1)?.toUpperCase() || "U"}</span>
+              <span>{initial}</span>
               <div>
                 <strong>{user?.first_name || user?.username}</strong>
                 <p>{user?.email || "Your secure budget account"}</p>
@@ -104,26 +132,90 @@ export function AppShell() {
               Sign out
             </button>
           </div>
-        </header>
 
-        <div className="mobile-nav" aria-label="Mobile navigation">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => `mobile-nav__link ${isActive ? "mobile-nav__link--active" : ""}`}
-              >
-                <Icon size={16} />
-                <span>{item.label}</span>
-              </NavLink>
-            );
-          })}
-        </div>
+          <button
+            type="button"
+            className="mobile-menu-button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+          >
+            <Menu size={20} />
+          </button>
+        </header>
 
         <Outlet />
       </div>
+
+      {menuOpen ? (
+        <>
+          <div
+            className="mobile-drawer-backdrop"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <aside
+            className="mobile-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+          >
+            <div className="mobile-drawer__header">
+              <div className="brand-mark">
+                <span className="brand-mark__badge">
+                  <Sparkles size={16} />
+                </span>
+                <strong>BudgetFlow</strong>
+              </div>
+              <button
+                type="button"
+                className="icon-button"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mobile-drawer__user">
+              <span className="mobile-drawer__avatar">{initial}</span>
+              <div>
+                <strong>{user?.first_name || user?.username}</strong>
+                <p>{user?.email || "Your budget account"}</p>
+              </div>
+            </div>
+
+            <nav className="mobile-drawer__nav" aria-label="Primary navigation">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `mobile-drawer__link ${isActive ? "mobile-drawer__link--active" : ""}`
+                    }
+                  >
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </NavLink>
+                );
+              })}
+            </nav>
+
+            <div className="mobile-drawer__footer">
+              <div className="mobile-drawer__row">
+                <span>Theme</span>
+                <ThemeToggle />
+              </div>
+              <button type="button" className="btn btn-ghost btn-block" onClick={handleLogout}>
+                <LogOut size={16} />
+                Sign out
+              </button>
+            </div>
+          </aside>
+        </>
+      ) : null}
     </div>
   );
 }

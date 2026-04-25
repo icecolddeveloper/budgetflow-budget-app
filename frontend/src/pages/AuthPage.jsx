@@ -5,6 +5,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/ToastProvider";
 import { useAuth } from "../context/AuthContext";
+import { computePasswordStrength } from "../utils/password";
 
 const initialLogin = {
   username: "",
@@ -22,12 +23,22 @@ const initialRegister = {
 const REGISTER_FIELDS = ["username", "first_name", "email", "password", "password_confirm"];
 const LOGIN_FIELDS = ["username", "password"];
 
-const PASSWORD_REQUIREMENTS = [
-  "At least 8 characters long",
-  "Not too similar to your username or email",
-  "Not a commonly used password",
-  "Not entirely numeric",
-];
+function PasswordStrengthMeter({ password }) {
+  const { score, label } = computePasswordStrength(password);
+  return (
+    <div className="password-strength" aria-live="polite">
+      <div className="password-strength__track">
+        <span
+          className={`password-strength__fill password-strength__fill--${score}`}
+          style={{ width: `${(score / 4) * 100}%` }}
+        />
+      </div>
+      <small className={`password-strength__label password-strength__label--${score}`}>
+        {label}
+      </small>
+    </div>
+  );
+}
 
 function extractFieldErrors(data, fields) {
   if (!data || typeof data !== "object") {
@@ -114,8 +125,8 @@ export function AuthPage() {
     if (!registerForm.email.trim()) {
       nextErrors.email = "Email is required.";
     }
-    if (registerForm.password.length < 8) {
-      nextErrors.password = "Use at least 8 characters.";
+    if (!registerForm.password) {
+      nextErrors.password = "Choose a password.";
     }
     if (registerForm.password !== registerForm.password_confirm) {
       nextErrors.password_confirm = "Passwords must match.";
@@ -296,14 +307,11 @@ export function AuthPage() {
                   value={registerForm.password}
                   onChange={updateRegister}
                   placeholder="Create a password"
-                  aria-describedby="password-requirements"
                 />
                 {errors.password ? <small>{errors.password}</small> : null}
-                <ul id="password-requirements" className="field__hints">
-                  {PASSWORD_REQUIREMENTS.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+                {registerForm.password ? (
+                  <PasswordStrengthMeter password={registerForm.password} />
+                ) : null}
               </label>
 
               <label className="field">

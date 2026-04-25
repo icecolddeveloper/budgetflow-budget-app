@@ -7,6 +7,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { CategoriesPage } from "./pages/CategoriesPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { TransactionsPage } from "./pages/TransactionsPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -18,6 +19,7 @@ function App() {
         element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth"} replace />}
       />
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route
         element={
           <ProtectedRoute>

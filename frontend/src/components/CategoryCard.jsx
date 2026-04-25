@@ -5,7 +5,6 @@ import { resolveCategoryIcon } from "../utils/icons";
 
 export function CategoryCard({ category, onEdit, onDelete, compact = false }) {
   const Icon = resolveCategoryIcon(category.icon);
-  const progress = Math.min(Number(category.utilization || 0), 100);
 
   return (
     <article className={`surface-card category-card ${compact ? "category-card--compact" : ""}`}>
@@ -47,20 +46,6 @@ export function CategoryCard({ category, onEdit, onDelete, compact = false }) {
         <div>
           <span className="metric-label">Current balance</span>
           <strong>{formatCurrency(category.balance)}</strong>
-        </div>
-        <div>
-          <span className="metric-label">Target</span>
-          <strong>{formatCurrency(category.monthly_budget)}</strong>
-        </div>
-      </div>
-
-      <div className="progress-block">
-        <div className="progress-block__labels">
-          <span>Progress to target</span>
-          <span>{progress}%</span>
-        </div>
-        <div className="progress-bar">
-          <span style={{ width: `${progress}%`, backgroundColor: category.color }} />
         </div>
       </div>
     </article>

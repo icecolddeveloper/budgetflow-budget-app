@@ -144,6 +144,16 @@ export const authApi = {
   me() {
     return request("/auth/me/");
   },
+  verifyEmail(token) {
+    return request(
+      "/auth/verify-email/",
+      { method: "POST", body: { token } },
+      false
+    );
+  },
+  resendVerification() {
+    return request("/auth/resend-verification/", { method: "POST", body: {} });
+  },
 };
 
 export const budgetApi = {

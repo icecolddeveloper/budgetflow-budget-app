@@ -5,9 +5,15 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email_verified = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ("id", "username", "first_name", "email")
+        fields = ("id", "username", "first_name", "email", "email_verified")
+
+    def get_email_verified(self, obj):
+        profile = getattr(obj, "profile", None)
+        return bool(profile and profile.email_verified)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -32,8 +38,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         from apps.budget.services import seed_default_categories
+        from apps.users.verification import send_verification_email
 
         seed_default_categories(user)
+        try:
+            send_verification_email(user)
+        except Exception:
+            # Email delivery is best-effort during registration; user can resend later.
+            pass
         return user
 
 
