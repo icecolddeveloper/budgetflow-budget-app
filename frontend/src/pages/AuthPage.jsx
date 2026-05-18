@@ -1,11 +1,21 @@
-import { ArrowRight, LockKeyhole, WalletCards } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowRight,
+  LineChart,
+  LockKeyhole,
+  ShieldCheck,
+  Sparkles,
+  WalletCards,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
+import { PasswordInput } from "../components/PasswordInput";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/ToastProvider";
 import { useAuth } from "../context/AuthContext";
 import { computePasswordStrength } from "../utils/password";
+
+const REMEMBER_KEY = "budgetflow:remember-username";
 
 const initialLogin = {
   username: "",
@@ -22,6 +32,24 @@ const initialRegister = {
 
 const REGISTER_FIELDS = ["username", "first_name", "email", "password", "password_confirm"];
 const LOGIN_FIELDS = ["username", "password"];
+
+const PREVIEW_ROWS = [
+  { name: "Groceries", fill: 71, amount: "$284 / $400", color: "#059669" },
+  { name: "Rent", fill: 95, amount: "$1,140 / $1,200", color: "#4f46e5" },
+  { name: "Fun money", fill: 35, amount: "$52 / $150", color: "#10b981" },
+];
+
+const HERO_STATS = [
+  { value: "4.9★", label: "Average rating" },
+  { value: "12K+", label: "Households planning" },
+  { value: "$240M", label: "Tracked this year" },
+];
+
+const TRUST_ITEMS = [
+  { icon: ShieldCheck, label: "Bank-level encryption" },
+  { icon: Sparkles, label: "No card required" },
+  { icon: LockKeyhole, label: "Free forever plan" },
+];
 
 function PasswordStrengthMeter({ password }) {
   const { score, label } = computePasswordStrength(password);
@@ -64,8 +92,22 @@ export function AuthPage() {
   const [mode, setMode] = useState("login");
   const [loginForm, setLoginForm] = useState(initialLogin);
   const [registerForm, setRegisterForm] = useState(initialRegister);
+  const [remember, setRemember] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(REMEMBER_KEY);
+      if (saved) {
+        setLoginForm((current) => ({ ...current, username: saved }));
+      } else {
+        setRemember(false);
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  }, []);
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -81,6 +123,10 @@ export function AuthPage() {
   function updateRegister(event) {
     const { name, value } = event.target;
     setRegisterForm((current) => ({ ...current, [name]: value }));
+  }
+
+  function handleForgotPassword() {
+    navigate("/forgot-password");
   }
 
   async function handleLogin(event) {
@@ -103,6 +149,15 @@ export function AuthPage() {
         username: loginForm.username.trim(),
         password: loginForm.password,
       });
+      try {
+        if (remember) {
+          localStorage.setItem(REMEMBER_KEY, loginForm.username.trim());
+        } else {
+          localStorage.removeItem(REMEMBER_KEY);
+        }
+      } catch {
+        /* ignore storage errors */
+      }
       toast.success("Welcome back", "Your financial dashboard is ready.");
       navigate(nextPath, { replace: true });
     } catch (error) {
@@ -180,19 +235,55 @@ export function AuthPage() {
           </p>
         </div>
 
-        <div className="hero-metrics">
-          <article className="surface-card hero-metrics__card">
-            <strong>Category balances</strong>
-            <p>See exactly what is available in every bucket before you spend.</p>
+        <div className="hero-stats">
+          {HERO_STATS.map((stat) => (
+            <div className="hero-stats__item" key={stat.label}>
+              <span className="hero-stats__value">{stat.value}</span>
+              <span className="hero-stats__label">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="hero-preview">
+          <article className="hero-preview__card">
+            <div className="hero-preview__header">
+              <span className="hero-preview__title">
+                <LineChart size={18} /> May envelopes
+              </span>
+              <span className="hero-preview__pill">Live preview</span>
+            </div>
+            <div className="hero-preview__rows">
+              {PREVIEW_ROWS.map((row) => (
+                <div className="hero-preview__row" key={row.name}>
+                  <div className="hero-preview__row-top">
+                    <span className="hero-preview__row-name">
+                      <span
+                        className="hero-preview__dot"
+                        style={{ "--dot": row.color }}
+                      />
+                      {row.name}
+                    </span>
+                    <span className="hero-preview__row-amount">{row.amount}</span>
+                  </div>
+                  <div className="hero-preview__bar">
+                    <span
+                      className="hero-preview__bar-fill"
+                      style={{ "--fill": `${row.fill}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </article>
-          <article className="surface-card hero-metrics__card">
-            <strong>Fast transaction flow</strong>
-            <p>Log income, track expenses, and allocate to envelopes without losing context.</p>
-          </article>
-          <article className="surface-card hero-metrics__card">
-            <strong>Readable insights</strong>
-            <p>Simple charts and clean summaries keep the signal strong.</p>
-          </article>
+
+          <div className="trust-strip">
+            {TRUST_ITEMS.map(({ icon: Icon, label }) => (
+              <div className="trust-strip__item" key={label}>
+                <Icon size={16} />
+                {label}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -237,21 +328,36 @@ export function AuthPage() {
                 value={loginForm.username}
                 onChange={updateLogin}
                 placeholder="Enter your username"
+                autoComplete="username"
               />
               {errors.username ? <small>{errors.username}</small> : null}
             </label>
 
             <label className="field">
               <span>Password</span>
-              <input
-                type="password"
+              <PasswordInput
                 name="password"
                 value={loginForm.password}
                 onChange={updateLogin}
                 placeholder="Enter your password"
+                autoComplete="current-password"
               />
               {errors.password ? <small>{errors.password}</small> : null}
             </label>
+
+            <div className="auth-form__row-between">
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(event) => setRemember(event.target.checked)}
+                />
+                Remember me
+              </label>
+              <button type="button" className="link-button" onClick={handleForgotPassword}>
+                Forgot password?
+              </button>
+            </div>
 
             <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
               <LockKeyhole size={16} />
@@ -273,6 +379,7 @@ export function AuthPage() {
                   value={registerForm.username}
                   onChange={updateRegister}
                   placeholder="Choose a username"
+                  autoComplete="username"
                 />
                 {errors.username ? <small>{errors.username}</small> : null}
               </label>
@@ -284,6 +391,7 @@ export function AuthPage() {
                   value={registerForm.first_name}
                   onChange={updateRegister}
                   placeholder="How should we greet you?"
+                  autoComplete="given-name"
                 />
               </label>
 
@@ -295,18 +403,19 @@ export function AuthPage() {
                   value={registerForm.email}
                   onChange={updateRegister}
                   placeholder="you@example.com"
+                  autoComplete="email"
                 />
                 {errors.email ? <small>{errors.email}</small> : null}
               </label>
 
               <label className="field">
                 <span>Password</span>
-                <input
-                  type="password"
+                <PasswordInput
                   name="password"
                   value={registerForm.password}
                   onChange={updateRegister}
                   placeholder="Create a password"
+                  autoComplete="new-password"
                 />
                 {errors.password ? <small>{errors.password}</small> : null}
                 {registerForm.password ? (
@@ -316,12 +425,12 @@ export function AuthPage() {
 
               <label className="field">
                 <span>Confirm password</span>
-                <input
-                  type="password"
+                <PasswordInput
                   name="password_confirm"
                   value={registerForm.password_confirm}
                   onChange={updateRegister}
                   placeholder="Repeat your password"
+                  autoComplete="new-password"
                 />
                 {errors.password_confirm ? <small>{errors.password_confirm}</small> : null}
               </label>

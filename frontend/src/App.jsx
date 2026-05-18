@@ -6,6 +6,8 @@ import { useAuth } from "./context/AuthContext";
 import { AuthPage } from "./pages/AuthPage";
 import { CategoriesPage } from "./pages/CategoriesPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { TransactionsPage } from "./pages/TransactionsPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 
@@ -19,6 +21,8 @@ function App() {
         element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth"} replace />}
       />
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route
         element={

@@ -3,6 +3,7 @@ from django.core import mail, signing
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
+from apps.users.password_reset import make_password_reset_token
 from apps.users.serializers import RegisterSerializer
 from apps.users.verification import make_verification_token
 
@@ -176,3 +177,145 @@ class EmailVerificationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 0)
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    FRONTEND_BASE_URL="http://localhost:5173",
+)
+class PasswordResetTests(TestCase):
+    def setUp(self):
+        mail.outbox = []
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username="erin",
+            email="erin@example.com",
+            password="OriginalPass123",
+            first_name="Erin",
+        )
+
+    def test_request_sends_email_for_known_address(self):
+        response = self.client.post(
+            "/api/auth/password-reset/",
+            data={"email": "erin@example.com"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("erin@example.com", mail.outbox[0].to)
+        self.assertIn("/reset-password?", mail.outbox[0].body)
+        self.assertIn("uid=", mail.outbox[0].body)
+        self.assertIn("token=", mail.outbox[0].body)
+
+    def test_request_returns_200_for_unknown_email_without_sending(self):
+        response = self.client.post(
+            "/api/auth/password-reset/",
+            data={"email": "stranger@example.com"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_request_rejects_invalid_email(self):
+        response = self.client.post(
+            "/api/auth/password-reset/",
+            data={"email": "not-an-email"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("email", response.json())
+
+    def test_request_is_case_insensitive(self):
+        response = self.client.post(
+            "/api/auth/password-reset/",
+            data={"email": "Erin@Example.COM"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_confirm_sets_new_password(self):
+        uid, token = make_password_reset_token(self.user)
+
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            data={
+                "uid": uid,
+                "token": token,
+                "password": "BrandNewPass456",
+                "password_confirm": "BrandNewPass456",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("BrandNewPass456"))
+        self.assertFalse(self.user.check_password("OriginalPass123"))
+
+    def test_confirm_rejects_mismatched_passwords(self):
+        uid, token = make_password_reset_token(self.user)
+
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            data={
+                "uid": uid,
+                "token": token,
+                "password": "BrandNewPass456",
+                "password_confirm": "DifferentPass789",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("password_confirm", response.json())
+
+    def test_confirm_rejects_tampered_token(self):
+        uid, _ = make_password_reset_token(self.user)
+
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            data={
+                "uid": uid,
+                "token": "bogus-token-value",
+                "password": "BrandNewPass456",
+                "password_confirm": "BrandNewPass456",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("token", response.json())
+
+    def test_token_is_single_use(self):
+        uid, token = make_password_reset_token(self.user)
+
+        first = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            data={
+                "uid": uid,
+                "token": token,
+                "password": "BrandNewPass456",
+                "password_confirm": "BrandNewPass456",
+            },
+            format="json",
+        )
+        self.assertEqual(first.status_code, 200)
+
+        # Reusing the same token after the password changed must fail because
+        # PasswordResetTokenGenerator hashes the current password into the token.
+        second = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            data={
+                "uid": uid,
+                "token": token,
+                "password": "AnotherPass999",
+                "password_confirm": "AnotherPass999",
+            },
+            format="json",
+        )
+        self.assertEqual(second.status_code, 400)

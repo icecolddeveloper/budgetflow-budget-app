@@ -7,7 +7,14 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .models import UserProfile
-from .serializers import BudgetTokenObtainPairSerializer, RegisterSerializer, UserSerializer
+from .password_reset import decode_password_reset_token, send_password_reset_email
+from .serializers import (
+    BudgetTokenObtainPairSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    RegisterSerializer,
+    UserSerializer,
+)
 from .verification import decode_verification_token, send_verification_email
 
 
@@ -96,3 +103,55 @@ class ResendVerificationView(APIView):
             )
 
         return Response({"detail": "Verification email sent."}, status=status.HTTP_200_OK)
+
+
+GENERIC_RESET_RESPONSE = {
+    "detail": "If an account exists for that email, a reset link is on the way.",
+}
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"].strip().lower()
+
+        User = get_user_model()
+        user = User.objects.filter(email__iexact=email, is_active=True).first()
+        if user is not None:
+            try:
+                send_password_reset_email(user)
+            except Exception:
+                # Swallow delivery errors so we never leak account existence.
+                pass
+
+        return Response(GENERIC_RESET_RESPONSE, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        uid = serializer.validated_data["uid"]
+        token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["password"]
+
+        user = decode_password_reset_token(uid, token)
+        if user is None:
+            return Response(
+                {"token": "This reset link is invalid or has expired."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        return Response(
+            {"detail": "Your password has been updated. You can sign in now."},
+            status=status.HTTP_200_OK,
+        )

@@ -3,6 +3,8 @@ from django.urls import path
 from .views import (
     BudgetTokenObtainPairView,
     BudgetTokenRefreshView,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
     ProfileView,
     RegisterView,
     ResendVerificationView,
@@ -20,5 +22,15 @@ urlpatterns = [
         "resend-verification/",
         ResendVerificationView.as_view(),
         name="resend-verification",
+    ),
+    path(
+        "password-reset/",
+        PasswordResetRequestView.as_view(),
+        name="password-reset",
+    ),
+    path(
+        "password-reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
     ),
 ]

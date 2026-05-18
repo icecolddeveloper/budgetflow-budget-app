@@ -154,6 +154,20 @@ export const authApi = {
   resendVerification() {
     return request("/auth/resend-verification/", { method: "POST", body: {} });
   },
+  requestPasswordReset(email) {
+    return request(
+      "/auth/password-reset/",
+      { method: "POST", body: { email } },
+      false
+    );
+  },
+  confirmPasswordReset(payload) {
+    return request(
+      "/auth/password-reset/confirm/",
+      { method: "POST", body: payload },
+      false
+    );
+  },
 };
 
 export const budgetApi = {
